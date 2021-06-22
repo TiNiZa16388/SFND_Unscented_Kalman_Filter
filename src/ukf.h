@@ -41,6 +41,11 @@ class UKF {
    */
   void UpdateRadar(MeasurementPackage meas_package);
 
+  /**
+   * Initialzation function
+   * @ measpackage the measurement at k+1
+   */
+  void Initialize(MeasurementPackage meas_package);
 
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -95,6 +100,12 @@ class UKF {
 
   // Sigma point spreading parameter
   double lambda_;
+
+  // flag for first call evaluation
+  bool already_called=false;
+
+  // minimum and maximum yaw rate required
+  double min_yaw_, max_yaw_;
 };
 
 #endif  // UKF_H

@@ -38,6 +38,18 @@ lmarker Tools::lidarSense(Car& car, pcl::visualization::PCLVisualizer::Ptr& view
 // sense where a car is located using radar measurement
 rmarker Tools::radarSense(Car& car, Car ego, pcl::visualization::PCLVisualizer::Ptr& viewer, long long timestamp, bool visualize)
 {
+	// std::cout << "-----" <<  std::endl;
+	// std::cout << "Actual Data:" << std::endl;
+	// std::cout << "car.position = " << car.position.x << ", " << car.position.y << std::endl;
+    // std::cout << "car.velocity = " << car.velocity << std::endl;
+	// std::cout << "car.angle = " << car.angle << std::endl;
+	// std::cout <<  std::endl;
+
+	// std::cout << "Prediction Result" << std::endl;
+  	// std::cout << "x_ = \n" << car.ukf.x_ << std::endl;
+	// std::cout << "-----" <<  std::endl;
+	// std::cout <<  std::endl;
+
 	double rho = sqrt((car.position.x-ego.position.x)*(car.position.x-ego.position.x)+(car.position.y-ego.position.y)*(car.position.y-ego.position.y));
 	double phi = atan2(car.position.y-ego.position.y,car.position.x-ego.position.x);
 	double rho_dot = (car.velocity*cos(car.angle)*rho*cos(phi) + car.velocity*sin(car.angle)*rho*sin(phi))/rho;
@@ -65,6 +77,7 @@ rmarker Tools::radarSense(Car& car, Car ego, pcl::visualization::PCLVisualizer::
 // int steps:: how many steps to show between present and time and future time
 void Tools::ukfResults(Car car, pcl::visualization::PCLVisualizer::Ptr& viewer, double time, int steps)
 {
+
 	UKF ukf = car.ukf;
 	viewer->addSphere(pcl::PointXYZ(ukf.x_[0],ukf.x_[1],3.5), 0.5, 0, 1, 0,car.name+"_ukf");
 	viewer->addArrow(pcl::PointXYZ(ukf.x_[0], ukf.x_[1],3.5), pcl::PointXYZ(ukf.x_[0]+ukf.x_[2]*cos(ukf.x_[3]),ukf.x_[1]+ukf.x_[2]*sin(ukf.x_[3]),3.5), 0, 1, 0, car.name+"_ukf_vel");
