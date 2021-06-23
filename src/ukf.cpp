@@ -222,11 +222,11 @@ void UKF::Prediction(double delta_t) {
 
   }
 
-  // std::cout << "Prediction Result" << std::endl;
-  // std::cout << "x_ = \n" << x_ << std::endl;
-  // std::cout << "P_ = \n" << P_ << std::endl;
+  std::cout << "Prediction Result" << std::endl;
+  std::cout << "x_ = \n" << x_ << std::endl;
+  std::cout << "P_ = \n" << P_ << std::endl;
   // std::cout << "Xsig_pred_ \n= " << Xsig_pred_ << std::endl;
-  // std::cout << std::endl;
+  std::cout << std::endl;
 
 }
 
@@ -343,10 +343,10 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
     // MatrixXd I = MatrixXd::Identity(x_size, x_size);
     // P_ = (I - K * H_) * P_;
 
-    // std::cout << "Update Lidar Result" << std::endl;
-    // std::cout << "x_ = \n" << x_ << std::endl;
-    // std::cout << "P_ = \n" << P_ << std::endl;
-    // std::cout << std::endl;
+    std::cout << "Update Lidar Result" << std::endl;
+    std::cout << "x_ = \n" << x_ << std::endl;
+    std::cout << "P_ = \n" << P_ << std::endl;
+    std::cout << std::endl;
  
   }else{
 
@@ -524,11 +524,11 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
     x_ = x_ + K * z_diff;
     P_ = P_ - K * S * K.transpose();
 
-    // std::cout << "Update Radar Result" << std::endl;
+    std::cout << "Update Radar Result" << std::endl;
     // std::cout << "Time stamp: " << meas_package.timestamp_ << std::endl;
-    // std::cout << "x_ = \n"<< x_ << std::endl;
-    // std::cout << "P_ = \n"<< P_ << std::endl;
-    // std::cout << std::endl;
+    std::cout << "x_ = \n"<< x_ << std::endl;
+    std::cout << "P_ = \n"<< P_ << std::endl;
+    std::cout << std::endl;
   
   }else{
 
@@ -553,6 +553,10 @@ void UKF::Initialize(MeasurementPackage meas_package){
     std::cout << "Lidar Init" << std::endl;
     std::cout << "x_ = \n" << x_ << std::endl;
     std::cout << std::endl;
+
+    // only declare as initialized, if radar measured was performed!
+    is_initialized_ = true;
+
   }
   else if (meas_package.sensor_type_ == meas_package.RADAR && use_radar_)
   {
