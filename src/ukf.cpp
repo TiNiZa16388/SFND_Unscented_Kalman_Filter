@@ -22,10 +22,10 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 0.5;
+  std_a_ = 2.0;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.1;
+  std_yawdd_ = 0.5;
   
   /**
    * DO NOT MODIFY measurement noise values below.
@@ -63,14 +63,14 @@ UKF::UKF() {
   n_aug_ = 7;
 
   // define spreading parameter
-  lambda_ = 3 - n_x_;
+  lambda_ = 3 - n_aug_;
 
   // initialize covariance matrix
-  P_ << 0.2, 0, 0, 0, 0,
-        0, 0.2, 0, 0, 0,
+  P_ << 1.0, 0, 0, 0, 0,
+        0, 1.0, 0, 0, 0,
         0, 0, 0.3, 0, 0,
-        0, 0, 0, 0.0225, 0,
-        0, 0, 0, 0, 0.0225;
+        0, 0, 0, 1E-1, 0,
+        0, 0, 0, 0, 1E-1;
 
 
   // predicted sigma point matrix
@@ -79,10 +79,12 @@ UKF::UKF() {
 
   // fill weights
   weights_ = VectorXd(2*n_aug_+1);
-  weights_(0) = lambda_/(lambda_+n_aug_);
+  weights_(0) = (double)lambda_/(lambda_+n_aug_);
   for(int i=1;i<2*n_aug_+1;++i){
-    weights_(i) = 0.5/(lambda_+n_aug_);
+    weights_(i) = (double)0.5/(lambda_+n_aug_);
   }
+  // std::cout << "weights = \n" << std::endl;
+  // std::cout << weights_ << std::endl;
 
   is_initialized_ = false;
 
@@ -216,7 +218,7 @@ void UKF::Prediction(double delta_t) {
 
     // angle normalization
     while(x_diff(3)>M_PI) x_diff(3)-=2.*M_PI;
-    while(x_diff(3)<M_PI) x_diff(3)+=2.*M_PI;
+    while(x_diff(3)<-M_PI) x_diff(3)+=2.*M_PI;
 
     P_ = P_ + weights_(i) * x_diff * x_diff.transpose();
 
@@ -224,9 +226,9 @@ void UKF::Prediction(double delta_t) {
 
   std::cout << "Prediction Result" << std::endl;
   std::cout << "x_ = \n" << x_ << std::endl;
-  std::cout << "P_ = \n" << P_ << std::endl;
-  // std::cout << "Xsig_pred_ \n= " << Xsig_pred_ << std::endl;
-  std::cout << std::endl;
+//  std::cout << "P_ = \n" << P_ << std::endl;
+//  std::cout << "Xsig_pred_ \n= " << Xsig_pred_ << std::endl;
+//  std::cout << std::endl;
 
 }
 
@@ -319,34 +321,10 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
     x_ = x_ + K * z_diff;
     P_ = P_ - K * S * K.transpose();
 
-    // Lesson 3.14
-
-    // MatrixXd H_ = MatrixXd(n_z, n_x_);
-    // H_ << 1, 0, 0, 0, 0,
-    //       0, 1, 0, 0, 0;
-
-    // VectorXd z_pred = H_ * x_;
-    // VectorXd y = z - z_pred;
-
-    // std::cout << "z deviation = \n" << y << std::endl;
-    // std::cout << std::endl;
-
-    // MatrixXd Ht = H_.transpose();
-    // MatrixXd S = H_ * P_ * Ht + R_;
-    // MatrixXd Si = S.inverse();
-    // MatrixXd PHt = P_ * Ht;
-    // MatrixXd K = PHt * Si;
-
-    //new estimate
-    // x_ = x_ + (K * y);
-    // long x_size = x_.size();
-    // MatrixXd I = MatrixXd::Identity(x_size, x_size);
-    // P_ = (I - K * H_) * P_;
-
     std::cout << "Update Lidar Result" << std::endl;
     std::cout << "x_ = \n" << x_ << std::endl;
-    std::cout << "P_ = \n" << P_ << std::endl;
-    std::cout << std::endl;
+  //  std::cout << "P_ = \n" << P_ << std::endl;
+  //  std::cout << std::endl;
  
   }else{
 
@@ -364,39 +342,6 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
    */
 
   if(is_initialized_==true){
-
-    // define augmented vector - source Lessong 4.18
-    // VectorXd x_aug = VectorXd(7); 
-    // x_aug.head(5) = x_;
-    // x_aug(5) = 0;
-    // x_aug(6) = 0;
-
-    // create augmented covariance matrix
-    // MatrixXd P_aug = MatrixXd(7, 7);
-    // P_aug.fill(0.0);
-    // P_aug.topLeftCorner(5,5) = P_;
-    // P_aug(5,5) = std_a_*std_a_;
-    // P_aug(6,6) = std_yawdd_*std_yawdd_;
-
-    // creating the sqare root matrix
-    // MatrixXd L = P_aug.llt().matrixL();
-    // std::cout << "L = " << L << std::endl;
-    
-    // create augmented sigma points
-    // MatrixXd Xsig_aug = MatrixXd(n_aug_, 2*n_aug_+1);
-    // Xsig_aug.col(0) = x_aug;
-    // for(int i=0; i<n_aug_; ++i){
-    //   Xsig_aug.col(i+1)           = x_aug + sqrt(lambda_+n_aug_) * L.col(i);
-    //   Xsig_aug.col(i+1+n_aug_)    = x_aug - sqrt(lambda_+n_aug_) * L.col(i);
-    // }
-    // for(int i=0; i < 2 * n_aug_ + 1; ++i){
-    //    Xsig_pred_.col(i)           = Xsig_aug.col(i).head(5);
-    // }
-
-    // std::cout << "Xsig_aug = " << Xsig_aug << std::endl;
-    // std::cout << "Performing Radar Update." << std::endl;
-    // std::cout << "Xsig_pred_ \n= " << Xsig_pred_ << std::endl;
-    // std::cout << std::endl;
 
     // measurement dimension
     int n_z = 3;
@@ -525,10 +470,9 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
     P_ = P_ - K * S * K.transpose();
 
     std::cout << "Update Radar Result" << std::endl;
-    // std::cout << "Time stamp: " << meas_package.timestamp_ << std::endl;
     std::cout << "x_ = \n"<< x_ << std::endl;
-    std::cout << "P_ = \n"<< P_ << std::endl;
-    std::cout << std::endl;
+  //  std::cout << "P_ = \n"<< P_ << std::endl;
+  //  std::cout << std::endl;
   
   }else{
 
@@ -550,8 +494,8 @@ void UKF::Initialize(MeasurementPackage meas_package){
 
     time_us_ = meas_package.timestamp_;
 
-    std::cout << "Lidar Init" << std::endl;
-    std::cout << "x_ = \n" << x_ << std::endl;
+//    std::cout << "Lidar Init" << std::endl;
+//    std::cout << "x_ = \n" << x_ << std::endl;
     std::cout << std::endl;
 
     // only declare as initialized, if radar measured was performed!
@@ -581,8 +525,8 @@ void UKF::Initialize(MeasurementPackage meas_package){
           0,          // yaw_0
           0;          // yawd_0
 
-    std::cout << "Radar Init" << std::endl;
-    std::cout << "x_ = \n" << x_ << std::endl;
+//    std::cout << "Radar Init" << std::endl;
+//    std::cout << "x_ = \n" << x_ << std::endl;
 
     time_us_ = meas_package.timestamp_;
 
